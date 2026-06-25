@@ -1,3 +1,4 @@
+require('./lib/node-crypto-compat');
 const NefitEasyClient = require('nefit-easy-commands');
 var Service, Characteristic;
 var deviceClient;
@@ -6,8 +7,8 @@ module.exports = function(homebridge) {
   Service        = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
 
-  homebridge.registerAccessory('homebridge-nefit-easy', 'NefitEasy', NefitEasyAccessory);
-  homebridge.registerAccessory('homebridge-nefit-easy', 'NefitEasyOutdoorTemp', NefitEasyAccessoryOutdoorTemp);
+  homebridge.registerAccessory('homebridge-jsg-nefit-easy', 'NefitEasy', NefitEasyAccessory);
+  homebridge.registerAccessory('homebridge-jsg-nefit-easy', 'NefitEasyOutdoorTemp', NefitEasyAccessoryOutdoorTemp);
 };
 
 const nefitEasyServices = function() {
@@ -27,7 +28,7 @@ function NefitEasyAccessory(log, config) {
   var creds = config.options || config.authentication;
   if (! creds || typeof creds.serialNumber !== 'string' ||
       typeof creds.accessKey !== 'string' || typeof creds.password !== 'string') {
-    throw Error('[homebridge-nefit-easy] Invalid/missing credentials in configuration file.');
+    throw Error('[homebridge-jsg-nefit-easy] Invalid/missing credentials in configuration file.');
   }
 
   this.serialNumber = creds.serialNumber;
@@ -150,7 +151,7 @@ function NefitEasyAccessoryOutdoorTemp(log, config) {
   var creds = config.options || config.authentication;
   if (! creds || typeof creds.serialNumber !== 'string' ||
       typeof creds.accessKey !== 'string' || typeof creds.password !== 'string') {
-    throw Error('[homebridge-nefit-easy] Invalid/missing credentials in configuration file.');
+    throw Error('[homebridge-jsg-nefit-easy] Invalid/missing credentials in configuration file.');
   }
 
   this.serialNumber = creds.serialNumber;

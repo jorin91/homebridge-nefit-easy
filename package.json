@@ -1,7 +1,7 @@
 {
-  "name": "homebridge-nefit-easy",
-  "version": "2.3.1",
-  "description": "Homebridge plugin for Nefit Easy™ (aka Worcester Wave™, Junkers Control™)",
+  "name": "homebridge-jsg-nefit-easy",
+  "version": "2.3.2",
+  "description": "JSG-prefixed Homebridge plugin for Nefit Easy™ (aka Worcester Wave™, Junkers Control™)",
   "main": "index.js",
   "keywords": [
     "homebridge-plugin",
@@ -14,7 +14,7 @@
     "node": ">=6.0.0",
     "homebridge": ">=0.2.0"
   },
-  "repository": "robertklep/homebridge-nefit-easy",
+  "repository": "jorin91/homebridge-nefit-easy",
   "author": "Robert Klep <robert@klep.name>",
   "license": "MIT",
   "dependencies": {

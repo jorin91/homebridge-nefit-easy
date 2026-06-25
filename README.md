@@ -1,31 +1,70 @@
-# DEPRECATED
+# Homebridge JSG Nefit Easy plugin
 
-Since I stopped using Homebridge many years ago, and also haven't had a Nefit Easy for more than 4 years, this plugin is deprecated. It may still work for you, or it may not, but I cannot provide support for it.
+This is the active JSG-prefixed fork of the Homebridge Nefit Easy plugin. It allows controlling a Nefit Easy™ thermostat, also known as Worcester Wave™ or Junkers Control™, through HomeKit via Homebridge.
 
-# Homebridge Nefit Easy™ plugin
+This fork uses a unique package and Homebridge plugin identifier while keeping the original accessory configuration names:
 
-This is a plugin for [Homebridge](https://github.com/nfarina/homebridge) to allow controlling your Nefit Easy™ (aka Worcester Wave™, Junkers Control™) thermostat through iOS' HomeKit.
+- Package name: `homebridge-jsg-nefit-easy`
+- Homebridge plugin identifier: `homebridge-jsg-nefit-easy`
+- Thermostat accessory config value: `NefitEasy`
+- Outdoor temperature accessory config value: `NefitEasyOutdoorTemp`
+
+The original upstream plugin is deprecated by its previous maintainer. This fork keeps the README aligned with active changes made in this repository.
 
 Uses the [`nefit-easy-commands`](https://github.com/robertklep/nefit-easy-commands) module under the hood to communicate with the Nefit/Bosch backend.
 
 ## Installation
 
-_This library requires Node.js 6.0.0 or later!_
+This library requires Node.js 6.0.0 or later and includes a Node.js 18 compatibility shim for the legacy SCRAM authentication dependency.
 
-```
-$ npm i homebridge-nefit-easy -g
+Install this fork directly from GitHub:
+
+```sh
+npm i -g github:jorin91/homebridge-nefit-easy
 ```
 
-Homebridge plugins need to be installed globally, so the `-g` is mandatory.
+If the JSG-prefixed package is published to npm later, it can be installed with:
+
+```sh
+npm i -g homebridge-jsg-nefit-easy
+```
+
+Homebridge plugins need to be installed globally, so the `-g` flag is required for normal Homebridge usage.
+
+Do not copy only `index.js` into an existing plugin folder. Install the package through npm so `nefit-easy-commands` and its transitive dependencies are installed as well.
+
+## Migration from the original plugin
+
+When moving from `homebridge-nefit-easy`, remove the original global package and install this fork:
+
+```sh
+npm uninstall -g homebridge-nefit-easy
+npm i -g github:jorin91/homebridge-nefit-easy
+```
+
+Your existing accessory config values can stay the same. This fork still registers `NefitEasy` and `NefitEasyOutdoorTemp` for compatibility with existing Homebridge configuration files.
+
+Because the config accessory names stay compatible with the original plugin, do not run the original plugin and this fork at the same time in the same Homebridge instance.
+
+## Node.js 18 compatibility
+
+Older versions of the SCRAM authentication dependency used by `nefit-easy-commands` can fail on Node.js 18 with this error:
+
+```txt
+ReferenceError: crypto is not defined
+```
+
+This fork initializes a small Node crypto compatibility layer before loading `nefit-easy-commands`, so the legacy dependency can still access `crypto.randomBytes` during authentication.
 
 ## Problems on recent Linux distributions
 
-If you're having problems getting any data from the HTTP server, and you're using a recent Linux distribution (for instance, Raspbian Buster), take a look at [this comment](https://github.com/robertklep/nefit-easy-http-server/issues/35#issuecomment-510818042).
+If you are having problems getting any data from the HTTP server, and you are using a recent Linux distribution such as Raspbian Buster, take a look at [this comment](https://github.com/robertklep/nefit-easy-http-server/issues/35#issuecomment-510818042).
 
-In short: OpenSSL defaults have changed to require a minimum TLS version and cipher implementation. These defaults cause the Nefit client code to not be able to connect to the Nefit/Bosch backend.
+In short: OpenSSL defaults have changed to require a minimum TLS version and cipher implementation. These defaults can prevent the Nefit client code from connecting to the Nefit/Bosch backend.
 
 The solution is mentioned [here](https://www.debian.org/releases/stable/amd64/release-notes/ch-information.en.html#openssl-defaults): edit the file `/etc/ssl/openssl.cnf` and change the following keys to these values:
-```
+
+```txt
 MinProtocol = None
 CipherString = DEFAULT
 ```
@@ -38,49 +77,51 @@ First, you need a working Homebridge installation.
 
 Once you have that working, edit `~/.homebridge/config.json` and add a new accessory:
 
-```
-"accessories": [
-    ...
-    {
-        "accessory" : "NefitEasy",
-        "name"      : "thermostaat",
-        "options"   : {
-            "serialNumber" : "NEFIT_SERIAL_NUMBER",
-            "accessKey"    : "NEFIT_ACCESS_KEY",
-            "password"     : "NEFIT_PASSWORD"
+```json
+{
+    "accessories": [
+        {
+            "accessory" : "NefitEasy",
+            "name"      : "thermostaat",
+            "options"   : {
+                "serialNumber" : "NEFIT_SERIAL_NUMBER",
+                "accessKey"    : "NEFIT_ACCESS_KEY",
+                "password"     : "NEFIT_PASSWORD"
+            }
         }
-    }
-]
+    ]
+}
 ```
 
-* The `name` will be the identifier that you can use, for example, in Siri commands;
-* Replace `NEFIT_*` with the correct values;
-* Any additional options get passed to the [`nefit-easy-core` constructor](https://github.com/robertklep/nefit-easy-core#constructor).
+- The `name` is the HomeKit identifier that you can use, for example, in Siri commands.
+- Replace `NEFIT_*` with the correct values.
+- Any additional options get passed to the [`nefit-easy-core` constructor](https://github.com/robertklep/nefit-easy-core#constructor).
 
 ### Outdoor temperature
 
 To also use the outdoor temperature measured by the Nefit Easy device, add a `NefitEasyOutdoorTemp` accessory to `~/.homebridge/config.json`:
 
-```
-"accessories": [
-    ...
-    {
-        "accessory" : "NefitEasyOutdoorTemp",
-        "name"      : "buitentemperatuur",
-        "options"   : {
-            "serialNumber" : "NEFIT_SERIAL_NUMBER",
-            "accessKey"    : "NEFIT_ACCESS_KEY",
-            "password"     : "NEFIT_PASSWORD"
+```json
+{
+    "accessories": [
+        {
+            "accessory" : "NefitEasyOutdoorTemp",
+            "name"      : "buitentemperatuur",
+            "options"   : {
+                "serialNumber" : "NEFIT_SERIAL_NUMBER",
+                "accessKey"    : "NEFIT_ACCESS_KEY",
+                "password"     : "NEFIT_PASSWORD"
+            }
         }
-    }
-]
+    ]
+}
 ```
 
-*All credentials options should be set for both the `NefitEasy` and the `NefitEasyOutdoorTemp` device.*
+All credential options should be set for both the `NefitEasy` and the `NefitEasyOutdoorTemp` device.
 
 ## Supported actions
 
-* Getting the current temperature
-* Getting the target temperature
-* Setting the target temperature
-* Getting the outside temperature (optional)
+- Getting the current temperature
+- Getting the target temperature
+- Setting the target temperature
+- Getting the outside temperature (optional)
