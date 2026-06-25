@@ -9,7 +9,7 @@
 - Homebridge plugin identifier: `homebridge-jsg-nefit-easy`.
 - Thermostat accessory config value: `NefitEasy`.
 - Outdoor temperature accessory config value: `NefitEasyOutdoorTemp`.
-- Current package version: `2.3.2`.
+- Current package version: `2.3.3`.
 - Entry point: `index.js`.
 - Runtime style: CommonJS Homebridge accessory plugin.
 
@@ -35,7 +35,19 @@
 
 ## Local Files
 
-- `config.json` is ignored by git because it is a personal Homebridge/Nefit device configuration file that may contain credentials.
+- Personal Homebridge/Nefit device config belongs at `.local/config.json`.
+- `.local/` is ignored by git because it can contain credentials and machine-specific test data.
+- Root `config.json` remains ignored as a safeguard against accidentally committing personal configuration in the old location.
+
+## Installation Notes
+
+- On Windows/Homebridge systems without `git.exe` on `PATH`, install from the GitHub tarball URL instead of the `github:` npm shorthand: `npm i -g https://github.com/jorin91/homebridge-nefit-easy/archive/refs/heads/master.tar.gz`.
+- The `github:jorin91/homebridge-nefit-easy` npm shorthand requires Git to be installed and discoverable on `PATH`; otherwise npm fails with `spawn git ENOENT`.
+
+## Dependency Pinning
+
+- `sasl-scram-sha-1` must stay pinned to `1.2.1`; `1.4.x` returns Promise-based auth responses that `node-xmpp-client@3.2.0` passes into `Buffer`, causing `TypeError: The first argument must be of type string... Received an instance of Promise`.
+- Keep `npm-shrinkwrap.json` in the repository so GitHub/tarball installs use the locked synchronous dependency tree instead of resolving the latest compatible semver release.
 
 ## Compatibility Notes
 

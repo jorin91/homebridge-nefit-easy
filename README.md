@@ -17,7 +17,13 @@ Uses the [`nefit-easy-commands`](https://github.com/robertklep/nefit-easy-comman
 
 This library requires Node.js 6.0.0 or later and includes a Node.js 18 compatibility shim for the legacy SCRAM authentication dependency.
 
-Install this fork directly from GitHub:
+Install this fork from the GitHub tarball. This works on Windows machines where Git is not installed or not available on `PATH`:
+
+```sh
+npm i -g https://github.com/jorin91/homebridge-nefit-easy/archive/refs/heads/master.tar.gz
+```
+
+If Git is installed and available on `PATH`, this GitHub shorthand also works:
 
 ```sh
 npm i -g github:jorin91/homebridge-nefit-easy
@@ -38,8 +44,8 @@ Do not copy only `index.js` into an existing plugin folder. Install the package 
 When moving from `homebridge-nefit-easy`, remove the original global package and install this fork:
 
 ```sh
-npm uninstall -g homebridge-nefit-easy
-npm i -g github:jorin91/homebridge-nefit-easy
+npm uninstall -g homebridge-nefit-easy homebridge-jsg-nefit-easy
+npm i -g https://github.com/jorin91/homebridge-nefit-easy/archive/refs/heads/master.tar.gz
 ```
 
 Your existing accessory config values can stay the same. This fork still registers `NefitEasy` and `NefitEasyOutdoorTemp` for compatibility with existing Homebridge configuration files.
@@ -54,7 +60,7 @@ Older versions of the SCRAM authentication dependency used by `nefit-easy-comman
 ReferenceError: crypto is not defined
 ```
 
-This fork initializes a small Node crypto compatibility layer before loading `nefit-easy-commands`, so the legacy dependency can still access `crypto.randomBytes` during authentication.
+This fork initializes a small Node crypto compatibility layer before loading `nefit-easy-commands`, so the legacy dependency can still access `crypto.randomBytes` during authentication. It also ships an `npm-shrinkwrap.json` file that pins `sasl-scram-sha-1` to `1.2.1`; newer `1.4.x` releases return async Promise values that the old `node-xmpp-client` auth flow cannot handle.
 
 ## Problems on recent Linux distributions
 
