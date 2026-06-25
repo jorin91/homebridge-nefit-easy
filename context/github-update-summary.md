@@ -1,6 +1,0 @@
-- Moved the personal Homebridge/Nefit config file from root `config.json` to ignored `.local/config.json`.
-- Updated `.gitignore` to ignore `.local/` while keeping root `config.json` ignored as a credential-safety fallback.
-- Updated `README.md` with a Git-less GitHub tarball install command for Windows/Homebridge systems where npm fails with `spawn git ENOENT`.
-- Pinned `sasl-scram-sha-1` to `1.2.1` in `package.json` and added `npm-shrinkwrap.json` so GitHub/tarball installs avoid the async `1.4.x` SCRAM implementation that breaks `node-xmpp-client`.
-- Bumped the fork version to `2.3.3` in `package.json`, `package-lock.json`, and `npm-shrinkwrap.json`.
-- Updated `context/plugin-overview.md` with local config placement, Git-less installation notes, and SCRAM dependency pinning requirements.
