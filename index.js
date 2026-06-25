@@ -1,5 +1,5 @@
 require('./lib/node-crypto-compat');
-const NefitEasyClient = require('nefit-easy-commands');
+const NefitClientManager = require('./lib/nefit-client-manager');
 var Service, Characteristic;
 var deviceClient;
 
@@ -20,28 +20,34 @@ const nefitEasyServices = function() {
   return [informationService, this.service];
 };
 
-function NefitEasyAccessory(log, config) {
-  this.log     = log;
-  this.name    = config.name;
-
-  // Make sure that the credentials are there.
+function getCredentials(config) {
   var creds = config.options || config.authentication;
   if (! creds || typeof creds.serialNumber !== 'string' ||
       typeof creds.accessKey !== 'string' || typeof creds.password !== 'string') {
     throw Error('[homebridge-jsg-nefit-easy] Invalid/missing credentials in configuration file.');
   }
 
-  this.serialNumber = creds.serialNumber;
-  this.service = new Service.Thermostat(this.name);
+  return creds;
+}
 
+function getDeviceClient(creds, log) {
   if (typeof deviceClient === 'undefined') {
-    deviceClient  = NefitEasyClient(creds);
+    deviceClient = new NefitClientManager(creds, log);
+    deviceClient.start();
   }
 
-  // Establish connection with device.
-  deviceClient.connect().catch((e) => {
-    throw Error(e);
-  });
+  return deviceClient;
+}
+
+function NefitEasyAccessory(log, config) {
+  this.log     = log;
+  this.name    = config.name;
+
+  var creds = getCredentials(config);
+
+  this.serialNumber = creds.serialNumber;
+  this.service = new Service.Thermostat(this.name);
+  this.deviceClient = getDeviceClient(creds, this.log);
 
   this.service
     .getCharacteristic(Characteristic.TemperatureDisplayUnits)
@@ -75,7 +81,7 @@ function NefitEasyAccessory(log, config) {
 const nefitEasyGetTemp = function(type, prop, skipOutdoor, callback) {
   this.log.debug('Getting %s temperature...', type);
 
-  deviceClient.status(skipOutdoor).then((status) => {
+  this.deviceClient.status(skipOutdoor).then((status) => {
     var temp = status[prop];
     if (!isNaN(temp) && isFinite(temp)) {
       this.log.debug('...%s temperature is %s', type, temp);
@@ -85,7 +91,7 @@ const nefitEasyGetTemp = function(type, prop, skipOutdoor, callback) {
       this.log.debug('Request for temperature resulted in invalid value: %s', temp);
 
       // Try one more time, this almost always results in a valid value.
-      deviceClient.status(skipOutdoor).then((newStatus) => {
+      this.deviceClient.status(skipOutdoor).then((newStatus) => {
         var newTemp = newStatus[prop];
         if (!isNaN(newTemp) && isFinite(newTemp)) {
           this.log.debug("Retry request for temperature resulted in valid value: %s", newTemp);
@@ -102,10 +108,13 @@ const nefitEasyGetTemp = function(type, prop, skipOutdoor, callback) {
             return callback(null, this.service.getCharacteristic(Characteristic.TargetTemperature).value);
           }
         }
+      }).catch((e) => {
+        this.log.error(e);
+        return callback(e);
       });
     }
   }).catch((e) => {
-    console.error(e);
+    this.log.error(e);
     return callback(e);
   });
 };
@@ -117,7 +126,7 @@ NefitEasyAccessory.prototype.setTemperature = function(temp, callback) {
   temp = Math.round(temp * 2) / 2;
 
   this.log.info('Setting temperature to %s', temp);
-  deviceClient.setTemperature(temp).then(() => {
+  this.deviceClient.setTemperature(temp).then(() => {
     return callback();
   }).catch((e) => {
     return callback(e);
@@ -127,7 +136,7 @@ NefitEasyAccessory.prototype.setTemperature = function(temp, callback) {
 NefitEasyAccessory.prototype.getCurrentState = function(callback) {
   this.log.debug('Getting current state..');
 
-  deviceClient.status(true).then((status) => {
+  this.deviceClient.status(true).then((status) => {
     var state     = status['boiler indicator'];
     var isHeating = state === 'central heating';
     this.log.debug('...current state is', state);
@@ -136,7 +145,7 @@ NefitEasyAccessory.prototype.getCurrentState = function(callback) {
                   Characteristic.CurrentHeatingCoolingState.OFF
     );
   }).catch((e) => {
-    console.error(e);
+    this.log.error(e);
     return callback(e);
   });
 };
@@ -147,24 +156,11 @@ function NefitEasyAccessoryOutdoorTemp(log, config) {
   this.log     = log;
   this.name    = config.name;
 
-  // Make sure that the credentials are there.
-  var creds = config.options || config.authentication;
-  if (! creds || typeof creds.serialNumber !== 'string' ||
-      typeof creds.accessKey !== 'string' || typeof creds.password !== 'string') {
-    throw Error('[homebridge-jsg-nefit-easy] Invalid/missing credentials in configuration file.');
-  }
+  var creds = getCredentials(config);
 
   this.serialNumber = creds.serialNumber;
   this.service = new Service.TemperatureSensor(this.name);
-
-  if (typeof deviceClient === 'undefined') {
-    deviceClient  = NefitEasyClient(creds);
-  }
-
-  // Establish connection with device.
-  deviceClient.connect().catch((e) => {
-    throw Error(e);
-  });
+  this.deviceClient = getDeviceClient(creds, this.log);
 
   this.service
     .getCharacteristic(Characteristic.CurrentTemperature)

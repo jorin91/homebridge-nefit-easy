@@ -60,7 +60,11 @@ Older versions of the SCRAM authentication dependency used by `nefit-easy-comman
 ReferenceError: crypto is not defined
 ```
 
-This fork initializes a small Node crypto compatibility layer before loading `nefit-easy-commands`, so the legacy dependency can still access `crypto.randomBytes` during authentication. It also ships an `npm-shrinkwrap.json` file that pins `sasl-scram-sha-1` to `1.2.1`; newer `1.4.x` releases return async Promise values that the old `node-xmpp-client` auth flow cannot handle.
+This fork initializes a small Node crypto compatibility layer before loading `nefit-easy-commands`, so the legacy dependency can still access `crypto.randomBytes` during authentication. It also ships an `npm-shrinkwrap.json` file and exact dependency pins for the original synchronous XMPP/SCRAM dependency set; newer `sasl-scram-sha-1` `1.4.x` releases return async Promise values that the old `node-xmpp-client` auth flow cannot handle.
+
+## Connection failures
+
+If the Nefit/Bosch backend rejects authentication, Homebridge may log XMPP authentication failure. That usually points to credentials or backend authentication, but this fork catches the underlying XMPP `error` event and reports the failure through HomeKit callbacks instead of letting the Homebridge process crash and restart.
 
 ## Problems on recent Linux distributions
 

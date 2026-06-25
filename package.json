@@ -1,6 +1,6 @@
 {
   "name": "homebridge-jsg-nefit-easy",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "JSG-prefixed Homebridge plugin for Nefit Easy™ (aka Worcester Wave™, Junkers Control™)",
   "main": "index.js",
   "keywords": [
@@ -18,7 +18,10 @@
   "author": "Robert Klep <robert@klep.name>",
   "license": "MIT",
   "dependencies": {
-    "nefit-easy-commands": "^3.0.2",
-    "sasl-scram-sha-1": "1.2.1"
+    "nefit-easy-commands": "3.0.2",
+    "nefit-easy-core": "4.0.0",
+    "node-xmpp-client": "3.2.0",
+    "sasl-scram-sha-1": "1.2.1",
+    "saslmechanisms": "0.1.1"
   }
 }
